@@ -1,5 +1,6 @@
 package ai.thecoder.archerena.ws
 
+import kotlin.random.Random
 import ai.thecoder.archerena.model.Player
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
@@ -25,7 +26,7 @@ class GameWsHandler: TextWebSocketHandler() {
     }
 
     public override fun handleTextMessage(session: WebSocketSession, message: TextMessage) {
-        val json = ObjectMapper().readTree(message?.payload)
+        val json = ObjectMapper().readTree(message.payload)
         when (json.get("type").asText()) {
             "move:left" -> {
                 var player : Player? = sessionList[session]
@@ -37,11 +38,22 @@ class GameWsHandler: TextWebSocketHandler() {
                 sessionList[session] = player?.moveRight(moveStep)!!
                 sendPlayers()
             }
+            "move:up" -> {
+                var player = sessionList[session]
+                sessionList[session] = player?.moveUp(moveStep)!!
+                sendPlayers()
+            }
+            "move:down" -> {
+                var player = sessionList[session]
+                sessionList[session] = player?.moveDown(moveStep)!!
+                sendPlayers()
+            }
         }
     }
 
     override fun afterConnectionEstablished(session: WebSocketSession) {
-        val player = Player(session.id, 100, 250)
+        var rand = Random(System.nanoTime()).nextInt(4 - 1 + 1) + 1
+        val player = Player(session.id, 240, 154, rand)
         sessionList.put(session, player)
         sendPlayers()
     }

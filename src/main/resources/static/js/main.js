@@ -1,15 +1,19 @@
 (() => {
     class Player {
-        constructor(id, posX, posY) {
+        constructor(id, posX, posY, character) {
             this.id = id;
             this.posX = posX;
             this.posY = posY;
+            this.character = character;
             this.step = 0;
         }
     }
 
     var players = {};
     var ws = new SockJS('/game');
+    const colors = [
+        "red", "green", "blue", "black"
+    ];
 
     function keyDownHandler(key) {
         let k = "";
@@ -20,19 +24,19 @@
 
         // arrow key UP
         else if (key.keyCode == 38) {
-            //k = "up";
+            k = "up";
         }
 
         // arrow key RIGHT
         else if (key.keyCode == 39) {
-        k = "right";
+            k = "right";
         }
 
         // arrow key DOWN
         else if (key.keyCode == 40) {
-        //k = "down";
+            k = "down";
         }
-        ws.send(JSON.stringify({type: "move:" + k, data: "okay"}));
+        ws.send(JSON.stringify({ type: "move:" + k, data: "okay" }));
     }
 
     function renderBg(bgArr) {
@@ -43,7 +47,7 @@
         let keys = Object.keys(players);
         for (let k of keys) {
             ctx.beginPath();
-            ctx.strokeStyle = "#FFFFFF";
+            ctx.strokeStyle = colors[players[k].character - 1];
             ctx.rect(players[k].posX, players[k].posY, 10, 10);
             ctx.stroke();
         }
@@ -61,7 +65,7 @@
         let m = JSON.parse(msg.data)
         if (m.msgType == "player:all") {
             for (let p of m.data) {
-                players[p.id] = new Player(p.id, p.posX, p.posY);
+                players[p.id] = new Player(p.id, p.posX, p.posY, p.character);
             }
         } else if (m.msgType == "player:out") {
             let id = m.data;
@@ -83,8 +87,8 @@
     ws.onopen = wsOnOpenHandler;
 
     let canvas = document.getElementById("mycanvas");
-    canvas.width = 730;
-    canvas.height = 364;
+    canvas.width = 500;
+    canvas.height = 328;
     let ctx = canvas.getContext("2d");
     let bg = [[0, 1, 2], [0, 0, 0]];
 
